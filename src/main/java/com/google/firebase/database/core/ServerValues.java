@@ -41,8 +41,10 @@ public class ServerValues {
     if (value instanceof Map) {
       Map mapValue = (Map) value;
       if (mapValue.containsKey(NAME_SUBKEY_SERVERVALUE)) {
-        String serverValueKey = (String) mapValue.get(NAME_SUBKEY_SERVERVALUE);
-        if (serverValues.containsKey(serverValueKey)) {
+        Object serverValueKey = mapValue.get(NAME_SUBKEY_SERVERVALUE);
+        // A compound server value (e.g. {".sv": {"increment": 1}}) can't be resolved here.
+        // Leave it as-is so it gets sent to the server, which understands it.
+        if (serverValueKey instanceof String && serverValues.containsKey(serverValueKey)) {
           return serverValues.get(serverValueKey);
         }
       }
@@ -70,8 +72,10 @@ public class ServerValues {
     if (priorityVal instanceof Map) {
       Map priorityMapValue = (Map) priorityVal;
       if (priorityMapValue.containsKey(NAME_SUBKEY_SERVERVALUE)) {
-        String serverValueKey = (String) priorityMapValue.get(NAME_SUBKEY_SERVERVALUE);
-        priorityVal = serverValues.get(serverValueKey);
+        Object serverValueKey = priorityMapValue.get(NAME_SUBKEY_SERVERVALUE);
+        if (serverValueKey instanceof String) {
+          priorityVal = serverValues.get(serverValueKey);
+        }
       }
     }
     Node priority = PriorityUtilities.parsePriority(priorityVal);
